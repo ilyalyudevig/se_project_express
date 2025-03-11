@@ -1,16 +1,11 @@
 const ClothingItem = require("../models/clothingItem");
-const {
-  BAD_REQUEST,
-  NOT_FOUND,
-  INTERNAL_SERVER_ERROR,
-} = require("../utils/errors");
+const { handleError } = require("../utils/handleError");
 
 module.exports.getItems = (req, res) => {
   ClothingItem.find({})
     .then((items) => res.send({ items }))
     .catch((err) => {
-      console.error(err);
-      res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
+      handleError(err, res);
     });
 };
 
@@ -20,12 +15,7 @@ module.exports.createItem = (req, res) => {
   ClothingItem.create({ name, weather, imageUrl, owner: req.user._id })
     .then((item) => res.send(item))
     .catch((err) => {
-      console.error(err);
-      if (err.name === "ValidationError") {
-        res.status(BAD_REQUEST).send({ message: err.message });
-      } else {
-        res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
-      }
+      handleError(err, res);
     });
 };
 
@@ -38,16 +28,7 @@ module.exports.deleteItem = (req, res) => {
       res.send(item);
     })
     .catch((err) => {
-      console.error(err);
-      if (err.name === "CastError") {
-        res.status(BAD_REQUEST).send({ message: "The item ID is not valid" });
-      } else if (err.name === "DocumentNotFoundError") {
-        res.status(NOT_FOUND).send({
-          message: "The item with this ID doesn't exist in the database",
-        });
-      } else {
-        res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
-      }
+      handleError(err, res);
     });
 };
 
@@ -62,16 +43,7 @@ module.exports.likeItem = (req, res) => {
       res.send(item);
     })
     .catch((err) => {
-      console.error(err);
-      if (err.name === "CastError") {
-        res.status(BAD_REQUEST).send({ message: "The item ID is not valid" });
-      } else if (err.name === "DocumentNotFoundError") {
-        res.status(NOT_FOUND).send({
-          message: "The item with this ID doesn't exist in the database",
-        });
-      } else {
-        res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
-      }
+      handleError(err, res);
     });
 };
 
@@ -86,15 +58,6 @@ module.exports.unlikeItem = (req, res) => {
       res.send(item);
     })
     .catch((err) => {
-      console.error(err);
-      if (err.name === "CastError") {
-        res.status(BAD_REQUEST).send({ message: "The item ID is not valid" });
-      } else if (err.name === "DocumentNotFoundError") {
-        res.status(NOT_FOUND).send({
-          message: "The item with this ID doesn't exist in the database",
-        });
-      } else {
-        res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
-      }
+      handleError(err, res);
     });
 };
