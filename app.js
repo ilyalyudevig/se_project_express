@@ -1,6 +1,9 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
+const routes = require("./routes");
+
+const { NOT_FOUND } = require("./utils/errors");
 
 const app = express();
 const { PORT = 3001 } = process.env;
@@ -17,13 +20,10 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use("/users", require("./routes/users"));
-app.use("/items", require("./routes/clothingItems"));
+app.use("/", routes);
 
 app.use((req, res) => {
-  if (!res.headersSent) {
-    res.status(404).json({ message: "Requested resource not found" });
-  }
+  res.status(NOT_FOUND).json({ message: "Requested resource not found" });
 });
 
 app.listen(PORT, () => {
