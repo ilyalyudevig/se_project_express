@@ -16,7 +16,8 @@ module.exports.handleError = (err, res) => {
     });
   } else if (
     err.name === "ValidationError" ||
-    err.name === "AuthorizationError"
+    err.name === "AuthorizationError" ||
+    err.name === "TypeError"
   ) {
     res.status(BAD_REQUEST).send({ message: err.message });
   } else if (err.name === "ForbiddenError") {
