@@ -22,8 +22,19 @@ module.exports.createItem = (req, res) => {
 module.exports.deleteItem = (req, res) => {
   const { itemId } = req.params;
 
-  ClothingItem.findByIdAndDelete(itemId)
+  ClothingItem.findById(itemId)
     .orFail()
+    .then((item) => {
+      if (item.owner.toString() !== req.user._id) {
+        const error = new Error(
+          `You don't have permissions to delete this item`
+        );
+        error.name = "ForbiddenError";
+        error.statusCode = 403;
+        throw error;
+      }
+      return ClothingItem.findByIdAndDelete(itemId);
+    })
     .then((item) => {
       res.send(item);
     })
