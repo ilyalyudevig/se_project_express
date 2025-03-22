@@ -4,6 +4,7 @@ const {
   INTERNAL_SERVER_ERROR,
   CONFLICT,
   FORBIDDEN,
+  UNAUTHORIZED,
 } = require("./errors");
 
 module.exports.handleError = (err, res) => {
@@ -14,14 +15,12 @@ module.exports.handleError = (err, res) => {
     res.status(NOT_FOUND).send({
       message: "Requested resource not found",
     });
-  } else if (
-    err.name === "ValidationError" ||
-    err.name === "AuthorizationError" ||
-    err.name === "TypeError"
-  ) {
+  } else if (err.name === "ValidationError") {
     res.status(BAD_REQUEST).send({ message: err.message });
   } else if (err.name === "ForbiddenError") {
     res.status(FORBIDDEN).send({ message: err.message });
+  } else if (err.name === "AuthorizationError") {
+    res.status(UNAUTHORIZED).send({ message: err.message });
   } else if (err.name === "ConflictError" || err.code === 11000) {
     res.status(CONFLICT).send({ message: err.message });
   } else {
