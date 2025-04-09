@@ -1,12 +1,14 @@
 const router = require("express").Router();
 const auth = require("../middlewares/auth");
-
 const { getItems } = require("../controllers/clothingItems");
-
 const { login, createUser } = require("../controllers/users");
+const {
+  validateUserData,
+  validateUserLoginData,
+} = require("../middlewares/validation");
 
-router.post("/signin", login);
-router.post("/signup", createUser);
+router.post("/signin", validateUserLoginData, login);
+router.post("/signup", validateUserData, createUser);
 router.get("/items", getItems);
 
 router.use(auth);

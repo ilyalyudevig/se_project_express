@@ -1,25 +1,30 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../models/user");
-const { handleError } = require("../utils/handleError");
 
 const { JWT_SECRET } = require("../utils/config");
-const { BAD_REQUEST } = require("../utils/errors");
 
-module.exports.getCurrentUser = (req, res) => {
+const NotFoundError = require("../errors/NotFoundError");
+const BadRequestError = require("../errors/BadRequestError");
+const ConflictError = require("../errors/ConflictError");
+const InternalServerError = require("../errors/InternalServerError");
+const UnauthorizedError = require("../errors/UnauthorizedError");
+
+module.exports.getCurrentUser = (req, res, next) => {
   const userId = req.user._id;
 
   User.findById(userId)
     .orFail()
     .then((user) => {
+      if (!user) {
+        throw new NotFoundError("No user with matching ID found");
+      }
       res.send(user);
     })
-    .catch((err) => {
-      handleError(err, res);
-    });
+    .catch(next);
 };
 
-module.exports.updateUserData = (req, res) => {
+module.exports.updateUserData = (req, res, next) => {
   const { _id } = req.user;
   const { name, avatar } = req.body;
 
@@ -29,32 +34,29 @@ module.exports.updateUserData = (req, res) => {
     { new: true, runValidators: true }
   )
     .orFail()
-    .then((user) => res.send(user))
-    .catch((err) => {
-      handleError(err, res);
-    });
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError("No user with matching ID found");
+      }
+      res.send(user);
+    })
+    .catch(next);
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
 
   User.findOne({ email })
     .then((existingUser) => {
       if (existingUser) {
-        const error = new Error("User with this email already exist");
-        error.name = "ConflictError";
-        error.statusCode = 409;
-        throw error;
+        throw new ConflictError("User with this email already exist");
       }
       return bcrypt.hash(password, 10);
     })
     .then((hash) => User.create({ name, avatar, email, password: hash }))
     .then((user) => {
       if (!user) {
-        const error = new Error("User creation failed");
-        error.name = "Database error";
-        error.statusCode = 500;
-        throw error;
+        throw new InternalServerError("User creation failed");
       }
       res.send({
         user: {
@@ -65,34 +67,25 @@ module.exports.createUser = (req, res) => {
         },
       });
     })
-    .catch((err) => {
-      handleError(err, res);
-    });
+    .catch(next);
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res
-      .status(BAD_REQUEST)
-      .send({ message: "Email and password are required" });
+    throw new BadRequestError("Email and password are required");
   }
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
       if (!user) {
-        const error = new Error("Incorrect email or password");
-        error.name = "AuthorizationError";
-        error.statusCode = 401;
-        throw error;
+        throw new UnauthorizedError("Incorrect email or password");
       }
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
       });
       res.send({ token });
     })
-    .catch((err) => {
-      handleError(err, res);
-    });
+    .catch(next);
 };
