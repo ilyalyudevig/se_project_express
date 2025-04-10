@@ -19,6 +19,9 @@ module.exports.validateItem = celebrate({
       "string.empty": 'The "imageUrl" field must be filled in',
       "string.uri": 'the "imageUrl" field must be a valid url',
     }),
+    weather: Joi.string().required().messages({
+      "string.empty": "Please specify the weather",
+    }),
   }),
 });
 
@@ -37,8 +40,8 @@ module.exports.validateUserData = celebrate({
       "string.empty": 'The "email" field must be filled in',
       "string.email": 'The "email" field must be a valid email address',
     }),
-    password: Joi.string().required().min(2).messages({
-      "string.min": 'The minimum length of the "password" field is 2',
+    password: Joi.string().required().min(8).messages({
+      "string.min": 'The minimum length of the "password" field is 8',
       "string.empty": 'The "password" field must be filled in',
     }),
   }),
