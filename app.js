@@ -14,9 +14,9 @@ const NotFoundError = require("./errors/NotFoundError");
 const app = express();
 const { PORT = 3001 } = process.env;
 
+app.use(limiter);
 app.use(cors());
 app.use(helmet());
-app.use(limiter);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
