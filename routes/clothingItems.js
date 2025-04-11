@@ -9,8 +9,10 @@ const {
 } = require("../controllers/clothingItems");
 
 router.post("/", validateItem, createItem);
-router.delete("/:itemId", validateItemId, deleteItem);
-router.put("/:itemId/likes", validateItemId, likeItem);
-router.delete("/:itemId/likes", validateItemId, unlikeItem);
+
+router.use("/:itemId", validateItemId);
+router.delete("/:itemId", deleteItem);
+router.put("/:itemId/likes", likeItem);
+router.delete("/:itemId/likes", unlikeItem);
 
 module.exports = router;

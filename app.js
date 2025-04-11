@@ -8,7 +8,7 @@ const { errors } = require("celebrate");
 const routes = require("./routes");
 const errorHandler = require("./middlewares/error-handler");
 const { requestLogger, errorLogger } = require("./middlewares/logger");
-const { NOT_FOUND } = require("./utils/errors");
+const NotFoundError = require("./utils/errors");
 
 const app = express();
 const { PORT = 3001 } = process.env;
@@ -23,8 +23,8 @@ mongoose.connect("mongodb://127.0.0.1:27017/wtwr_db");
 app.use(requestLogger);
 app.use("/", routes);
 
-app.use((req, res) => {
-  res.status(NOT_FOUND).json({ message: "Requested resource not found" });
+app.use((req, res, next) => {
+  next(new NotFoundError("Requested resource not found"));
 });
 
 app.use(errorLogger);

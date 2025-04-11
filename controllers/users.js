@@ -14,11 +14,8 @@ module.exports.getCurrentUser = (req, res, next) => {
   const userId = req.user._id;
 
   User.findById(userId)
-    .orFail()
+    .orFail(() => new NotFoundError("No user with matching ID found"))
     .then((user) => {
-      if (!user) {
-        throw new NotFoundError("No user with matching ID found");
-      }
       res.send(user);
     })
     .catch(next);
@@ -33,14 +30,17 @@ module.exports.updateUserData = (req, res, next) => {
     { name, avatar },
     { new: true, runValidators: true }
   )
-    .orFail()
+    .orFail(() => new NotFoundError("No user with matching ID found"))
     .then((user) => {
-      if (!user) {
-        throw new NotFoundError("No user with matching ID found");
-      }
       res.send(user);
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        next(new BadRequestError("Invalid data"));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.createUser = (req, res, next) => {
@@ -67,7 +67,13 @@ module.exports.createUser = (req, res, next) => {
         },
       });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        next(new BadRequestError("Invalid data"));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.login = (req, res, next) => {

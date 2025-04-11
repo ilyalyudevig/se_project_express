@@ -1,5 +1,6 @@
 const ForbiddenError = require("../errors/ForbiddenError");
 const BadRequestError = require("../errors/BadRequestError");
+const NotFoundError = require("../errors/NotFoundError");
 
 const ClothingItem = require("../models/clothingItem");
 
@@ -14,14 +15,20 @@ module.exports.createItem = (req, res, next) => {
 
   ClothingItem.create({ name, weather, imageUrl, owner: req.user._id })
     .then((item) => res.send(item))
-    .catch(next);
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        next(new BadRequestError("Invalid data"));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.deleteItem = (req, res, next) => {
   const { itemId } = req.params;
 
   ClothingItem.findById(itemId)
-    .orFail()
+    .orFail(() => new NotFoundError("No item with matching ID found"))
     .then((item) => {
       if (item.owner.toString() !== req.user._id) {
         throw new ForbiddenError(
@@ -48,7 +55,7 @@ module.exports.likeItem = (req, res, next) => {
     { $addToSet: { likes: req.user._id } },
     { new: true }
   )
-    .orFail()
+    .orFail(() => new NotFoundError("No item with matching ID found"))
     .then((item) => {
       res.send(item);
     })
@@ -61,7 +68,7 @@ module.exports.unlikeItem = (req, res, next) => {
     { $pull: { likes: req.user._id } },
     { new: true }
   )
-    .orFail()
+    .orFail(() => new NotFoundError("No item with matching ID found"))
     .then((item) => {
       res.send(item);
     })
