@@ -5,16 +5,18 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const { errors } = require("celebrate");
+const { limiter } = require("./utils/rateLimiter");
 const routes = require("./routes");
 const errorHandler = require("./middlewares/error-handler");
 const { requestLogger, errorLogger } = require("./middlewares/logger");
-const NotFoundError = require("./utils/errors");
+const NotFoundError = require("./errors/NotFoundError");
 
 const app = express();
 const { PORT = 3001 } = process.env;
 
 app.use(cors());
 app.use(helmet());
+app.use(limiter);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
