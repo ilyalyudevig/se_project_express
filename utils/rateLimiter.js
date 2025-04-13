@@ -5,5 +5,14 @@ module.exports.limiter = rateLimit({
   limit: 100,
   standardHeaders: "draft-8",
   legacyHeaders: false,
-  skip: (req) => req.method === "OPTIONS",
+  handler: (req, res, next) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    if (req.method === "OPTIONS") {
+      res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+      res.setHeader(
+        "Access-Control-Allow-Methods",
+        "HEAD, GET, POST, PUT, PATCH, DELETE"
+      );
+    }
+  },
 });
