@@ -5,7 +5,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const { errors } = require("celebrate");
-const { limiter } = require("./utils/rateLimiter");
+const { limiter } = require("./middlewares/rateLimiter");
 const routes = require("./routes");
 const errorHandler = require("./middlewares/error-handler");
 const { requestLogger, errorLogger } = require("./middlewares/logger");
@@ -16,13 +16,11 @@ const { PORT = 3001 } = process.env;
 
 app.use(
   cors({
-    origin: "https://wtwr.zsh.jp",
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    origin: ["https://wtwr.zsh.jp", "https://api.wtwr.zsh.jp"],
+    methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
-app.options("*", cors());
 
 app.use(helmet());
 
