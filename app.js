@@ -16,11 +16,13 @@ const { PORT = 3001 } = process.env;
 
 app.use(
   cors({
-    origin: ["https://wtwr.zsh.jp", "https://api.wtwr.zsh.jp"],
+    origin: ["https://wtwr.zsh.jp"],
     methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+app.options("*", cors());
 
 app.use(helmet());
 
