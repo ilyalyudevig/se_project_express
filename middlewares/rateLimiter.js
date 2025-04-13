@@ -5,5 +5,4 @@ module.exports.limiter = rateLimit({
   limit: 100,
   standardHeaders: "draft-8",
   legacyHeaders: false,
-  skip: (req) => req.method === "OPTIONS",
 });
